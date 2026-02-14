@@ -10,49 +10,16 @@ const photosHeading = document.getElementById('photos-heading');
 const messageHeading = document.getElementById('message-heading');
 const photosGrid = document.getElementById('photos-grid');
 
-// ================== CINEMATIC PHOTOS CAROUSEL ==================
-let currentPhotoIndex = 0;
+// ================== CONTINUOUS CAROUSEL INITIALIZATION ==================
 let allPhotos = [];
-let carouselActive = false;
-let carouselTimer = null;
 
 function initializeCarousel(){
   allPhotos = Array.from(photosGrid.querySelectorAll('img'));
-  allPhotos.forEach(img => img.classList.add('hidden'));
-  currentPhotoIndex = 0;
-}
-
-function showPhotoSequence(){
-  if(allPhotos.length === 0) return;
-  
-  const displayPhoto = () => {
-    // hide all
-    allPhotos.forEach(img => img.classList.add('hidden'));
-    
-    // show current with fade-in effect
-    const currentImg = allPhotos[currentPhotoIndex];
-    currentImg.classList.remove('hidden');
-    currentImg.style.animation = 'none';
-    // trigger animation
-    setTimeout(() => {
-      currentImg.style.animation = 'photoFadeIn 0.8s ease-out';
-    }, 10);
-    
-    currentPhotoIndex++;
-    
-    // if more photos, schedule next one
-    if(currentPhotoIndex < allPhotos.length){
-      carouselTimer = setTimeout(displayPhoto, 2000); // 2s per photo
-    } else {
-      carouselActive = false;
-      // loop back to start
-      currentPhotoIndex = 0;
-      carouselTimer = setTimeout(displayPhoto, 500);
-    }
-  };
-  
-  carouselActive = true;
-  displayPhoto();
+  // Remove hidden class from all photos to show them in carousel
+  allPhotos.forEach(img => img.classList.remove('hidden'));
+  // Duplicate photos for seamless loop
+  const photoClones = allPhotos.map(img => img.cloneNode(true));
+  photoClones.forEach(clone => photosGrid.appendChild(clone));
 }
 
 function hideAll(){
@@ -73,7 +40,6 @@ function showPanel(panelName){
     photosHeading.classList.remove('hidden');
     btnPhotos.setAttribute('aria-pressed','true');
     initializeCarousel();
-    showPhotoSequence();
   } else if(panelName === 'flowers'){
     flowersPanel.classList.remove('hidden');
     flowersPanel.removeAttribute('aria-hidden');
