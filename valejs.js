@@ -1,7 +1,8 @@
-// Panel switcher: no panels visible initially
+// 1. Element Selectors
 const btnPhotos = document.getElementById('btn-photos');
 const btnFlowers = document.getElementById('btn-flowers');
 const btnMessage = document.getElementById('btn-message');
+const musicBtn = document.getElementById('btn-music');
 
 const photosPanel = document.getElementById('photos-panel');
 const flowersPanel = document.getElementById('flowers-panel');
@@ -10,166 +11,216 @@ const photosHeading = document.getElementById('photos-heading');
 const messageHeading = document.getElementById('message-heading');
 const photosGrid = document.getElementById('photos-grid');
 
-// ================== PHOTO GALLERY - FADE IN/OUT ==================
-let allPhotos = [];
-let currentPhotoIndex = 0;
-let carouselActive = false;
-let carouselTimer = null;
+const bgMusic = document.getElementById('bg-music');
+const musicIcon = document.getElementById('music-icon');
 
-function initializeCarousel(){
-  allPhotos = Array.from(photosGrid.querySelectorAll('img'));
-  allPhotos.forEach(img => {
-    img.classList.add('hidden');
-    img.style.opacity = '0';
-  });
-  currentPhotoIndex = 0;
-  showPhotoSequence();
-}
+// 2. State Management
+let isPlaying = false;
+let initialized = false;
+let state = {
+  track: null,
+  items: [],
+  originalCount: 0,
+  index: 0,
+  targets: [],
+  timer: null,
+  transition: 700,
+  pause: 1700
+};
 
-function showPhotoSequence(){
-  if(allPhotos.length === 0) return;
-  
-  const displayPhoto = () => {
-    // Hide all photos
-    allPhotos.forEach(img => img.classList.add('hidden'));
-    
-    // Show current photo with fade in
-    const currentImg = allPhotos[currentPhotoIndex];
-    currentImg.classList.remove('hidden');
-    currentImg.style.animation = 'none';
-    setTimeout(() => {
-      currentImg.style.animation = 'photoFadeIn 0.8s ease-out forwards';
-    }, 10);
-    
-    currentPhotoIndex++;
-    
-    // Move to next photo after 3 seconds
-    if(currentPhotoIndex < allPhotos.length){
-      carouselTimer = setTimeout(displayPhoto, 3000);
-    } else {
-      // Loop back to start
-      currentPhotoIndex = 0;
-      carouselTimer = setTimeout(displayPhoto, 500);
-    }
-  };
-  
-  carouselActive = true;
-  displayPhoto();
-}
-
-function hideAll(){
+// 3. Panel Navigation
+function hideAll() {
   [photosPanel, flowersPanel, messagePanel].forEach(p => {
     p.classList.add('hidden');
-    p.setAttribute('aria-hidden','true');
+    p.setAttribute('aria-hidden', 'true');
   });
-  [btnPhotos, btnFlowers, btnMessage].forEach(b => b.setAttribute('aria-pressed','false'));
+  // Reset button states (but don't touch music)
+  [btnPhotos, btnFlowers, btnMessage].forEach(b => b.setAttribute('aria-pressed', 'false'));
 }
-hideAll();
 
-// show chosen panel; photos heading only appears when photos panel is opened
-function showPanel(panelName){
+function showPanel(panelName) {
   hideAll();
-  if(panelName === 'photos'){
+  if (panelName === 'photos') {
     photosPanel.classList.remove('hidden');
     photosPanel.removeAttribute('aria-hidden');
     photosHeading.classList.remove('hidden');
-    btnPhotos.setAttribute('aria-pressed','true');
+    btnPhotos.setAttribute('aria-pressed', 'true');
     initializeCarousel();
-  } else if(panelName === 'flowers'){
+  } else if (panelName === 'flowers') {
     flowersPanel.classList.remove('hidden');
     flowersPanel.removeAttribute('aria-hidden');
-    btnFlowers.setAttribute('aria-pressed','true');
-  } else if(panelName === 'message'){
+    btnFlowers.setAttribute('aria-pressed', 'true');
+  } else if (panelName === 'message') {
     messagePanel.classList.remove('hidden');
     messagePanel.removeAttribute('aria-hidden');
     messageHeading.classList.remove('hidden');
-    btnMessage.setAttribute('aria-pressed','true');
-    // focus the message for screen readers
+    btnMessage.setAttribute('aria-pressed', 'true');
     const msg = document.getElementById('message-content');
-    if(msg) msg.focus();
+    if (msg) msg.focus();
   }
 }
 
-// wire up buttons
-btnPhotos.addEventListener('click', () => showPanel('photos'));
-btnFlowers.addEventListener('click', () => showPanel('flowers'));
-btnMessage.addEventListener('click', () => showPanel('message'));
+// 4. Music Logic
+musicBtn.addEventListener('click', () => {
+  if (isPlaying) {
+    bgMusic.pause();
+    musicIcon.textContent = '🎵';
+    musicBtn.classList.remove('playing');
+  } else {
+    bgMusic.play().catch(e => console.log("Playback failed:", e));
+    musicIcon.textContent = '⏸️';
+    musicBtn.classList.add('playing');
+  }
+  isPlaying = !isPlaying;
+});
 
-// -------------------- Bouquet interaction --------------------
+// 5. Carousel Logic (Centering & Scaling)
+function initializeCarousel() {
+  if (initialized) return;
+
+  const imgs = Array.from(photosGrid.querySelectorAll('img'));
+  if (!imgs.length) return;
+
+  const track = document.createElement('div');
+  track.className = 'photos-track';
+
+  imgs.forEach(img => {
+    img.style.transition = "transform 600ms ease, opacity 600ms ease";
+    img.style.transform = "scale(0.7)";
+    img.style.opacity = "0.6";
+    track.appendChild(img);
+  });
+
+  photosGrid.innerHTML = "";
+  photosGrid.appendChild(track);
+
+  // Clone for seamless looping
+  const originals = Array.from(track.children);
+  originals.forEach(node => {
+    const clone = node.cloneNode(true);
+    clone.style.transition = "transform 600ms ease, opacity 600ms ease";
+    clone.style.transform = "scale(0.7)";
+    clone.style.opacity = "0.6";
+    track.appendChild(clone);
+  });
+
+  state.track = track;
+  state.originalCount = originals.length;
+  state.items = Array.from(track.children);
+
+  const promises = state.items.map(img => {
+    return img.complete ? Promise.resolve() : new Promise(res => {
+      img.onload = img.onerror = res;
+    });
+  });
+
+  Promise.all(promises).then(() => {
+    computeTargets();
+    centerInstant(0);
+    setTimeout(() => {
+      track.style.transition = `transform ${state.transition}ms ease`;
+      startCarousel();
+    }, 50);
+    window.addEventListener('resize', handleResize);
+    initialized = true;
+  });
+}
+
+function computeTargets() {
+  const containerWidth = photosGrid.clientWidth;
+  state.targets = state.items.map(el => {
+    return el.offsetLeft - ((containerWidth - el.offsetWidth) / 2);
+  });
+}
+
+function centerInstant(i) {
+  state.index = i;
+  state.track.style.transition = "none";
+  state.track.style.transform = `translateX(-${state.targets[i]}px)`;
+  highlightCenter();
+}
+
+function highlightCenter() {
+  state.items.forEach((img, idx) => {
+    if (idx === state.index) {
+      img.style.transform = "scale(1)";
+      img.style.opacity = "1";
+    } else {
+      img.style.transform = "scale(0.7)";
+      img.style.opacity = "0.6";
+    }
+  });
+}
+
+function startCarousel() {
+  scheduleNext();
+}
+
+function scheduleNext() {
+  state.timer = setTimeout(() => {
+    moveNext();
+  }, state.pause);
+}
+
+function moveNext() {
+  state.index++;
+  state.track.style.transform = `translateX(-${state.targets[state.index]}px)`;
+  highlightCenter();
+
+  setTimeout(() => {
+    if (state.index >= state.originalCount) {
+      state.index -= state.originalCount;
+      state.track.style.transition = "none";
+      state.track.style.transform = `translateX(-${state.targets[state.index]}px)`;
+      highlightCenter();
+      void state.track.offsetHeight; // Force reflow
+      state.track.style.transition = `transform ${state.transition}ms ease`;
+    }
+    scheduleNext();
+  }, state.transition);
+}
+
+function handleResize() {
+  computeTargets();
+  centerInstant(state.index);
+}
+
+// 6. Flower Logic
 const bouquet = document.getElementById('bouquet');
 const stage = document.getElementById('flower-stage');
 
-function spawnFloating(x, y, char){
+function spawnFloating(x, y, char) {
   const el = document.createElement('div');
   el.className = 'float';
   el.style.left = (x - 12) + 'px';
   el.style.top = (y - 12) + 'px';
   el.textContent = char;
-  // random horizontal drift by updating transform property after insertion
   const dx = (Math.random() - 0.5) * 120;
   const dur = 1400 + Math.random() * 900;
   el.style.animationDuration = dur + 'ms';
   el.style.transform = `translateX(${dx}px)`;
   stage.appendChild(el);
-  setTimeout(()=> {
-    // small gentle rotation added
-    el.style.transform = el.style.transform + ` rotate(${(Math.random()-0.5)*40}deg)`;
-  }, 10);
-  setTimeout(()=> el.remove(), dur + 80);
+  setTimeout(() => el.remove(), dur + 80);
 }
 
-// when bouquet clicked spawn multiple small floats (hearts & petals)
-bouquet.addEventListener('click', (ev) => {
-  ev.stopPropagation();
+bouquet.addEventListener('click', () => {
   const rect = stage.getBoundingClientRect();
-  // center-ish coordinates where bouquet sits
-  const cx = rect.width/2;
-  const cy = rect.height/2 - 10;
-
-  const emojis = ['💗','🌸','💐','✨','💕'];
-  const count = 10 + Math.floor(Math.random()*8);
-  for(let i=0;i<count;i++){
-    // scatter around bouquet center
-    const x = cx + (Math.random()-0.5) * 160;
-    const y = cy + (Math.random()-0.2) * 60;
-    const char = emojis[Math.floor(Math.random()*emojis.length)];
-    spawnFloating(x, y, char);
-  }
-
-  // gentle "pop" feedback
-  bouquet.style.transform = 'scale(0.985)';
-  setTimeout(()=> bouquet.style.transform = '', 140);
-});
-
-// also spawn tiny floats on stage click (interactive)
-stage.addEventListener('click', (e) => {
-  // if bouquet itself handled it, skip (bouquet click stops propagation)
-  const rect = stage.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const emojis = ['🌸','💗'];
-  const char = emojis[Math.floor(Math.random()*emojis.length)];
-  // spawn a smaller cluster for clicks outside bouquet
-  const cluster = 1 + Math.floor(Math.random()*3);
-  for(let i=0;i<cluster;i++){
-    const rx = x + (Math.random()-0.5) * 40;
-    const ry = y + (Math.random()-0.5) * 30;
-    spawnFloating(rx, ry, char);
+  const cx = rect.width / 2;
+  const cy = rect.height / 2 - 10;
+  const emojis = ['💗', '🌸', '💐', '✨', '💕'];
+  for (let i = 0; i < 12; i++) {
+    spawnFloating(
+      cx + (Math.random() - 0.5) * 160,
+      cy + (Math.random() - 0.2) * 60,
+      emojis[Math.floor(Math.random() * emojis.length)]
+    );
   }
 });
 
-// keyboard accessibility: let Enter/Space on bouquet trigger the effect
-bouquet.setAttribute('tabindex', '0');
-bouquet.addEventListener('keydown', (e) => {
-  if(e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    bouquet.click();
-  }
-});
+// 7. Event Listeners
+btnPhotos.addEventListener('click', () => showPanel('photos'));
+btnFlowers.addEventListener('click', () => showPanel('flowers'));
+btnMessage.addEventListener('click', () => showPanel('message'));
 
-// keyboard shortcuts for panels (1,2,3)
-document.addEventListener('keydown', (e) => {
-  if(e.key === '1') btnPhotos.click();
-  if(e.key === '2') btnFlowers.click();
-  if(e.key === '3') btnMessage.click();
-});
+// Run on start
+hideAll();
