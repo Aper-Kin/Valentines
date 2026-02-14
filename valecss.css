@@ -73,9 +73,11 @@ body{
 .hidden{ display:none !important; }
 
 /* photos grid - carousel container */
+/* photos grid */
 .photos-grid{
   display:flex;
   align-items:center;
+  justify-content:center;
   margin-top:12px;
   position:relative;
   width:100%;
@@ -83,76 +85,53 @@ body{
   background:linear-gradient(135deg,rgba(255,208,206,0.2),rgba(255,220,230,0.2));
   border-radius:14px;
   overflow:hidden;
-  gap:16px;
-  padding:16px;
-  animation: carouselScroll 40s linear infinite;
-  will-change: transform;
 }
 .photos-grid img{ 
-  width:250px;
-  height:250px;
-  object-fit:cover; 
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain; 
   border-radius:8px; 
-  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-  flex-shrink:0;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15); 
+  position:absolute;
+  opacity:0;
 }
 .photos-grid img.hidden{ display:none; }
+.photos-grid img:not(.hidden){ opacity:1; }
 
-@keyframes carouselScroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(calc(-100% - 16px)); }
+@keyframes photoFadeIn{
+  0%{ opacity:0; transform:scale(0.85) translateY(30px); }
+  50%{ transform:scale(1.02); }
+  100%{ opacity:1; transform:scale(1) translateY(0); }
 }
 
 @media (max-width:768px){
   .photos-grid{
     height:240px;
-    gap:12px;
-    padding:12px;
-    animation: carouselScroll 35s linear infinite;
   }
   .photos-grid img{
-    width:200px;
-    height:200px;
+    border-radius:6px;
   }
 }
 
 @media (max-width:640px){
   .photos-grid{ 
     height:200px;
-    gap:10px;
-    padding:10px;
-    animation: carouselScroll 32s linear infinite;
   }
   .photos-grid img{ 
-    width:160px;
-    height:160px;
     border-radius:6px;
   }
 }
 
 @media (max-width:480px){
   .photos-grid{ 
-    height:150px;
-    gap:8px;
-    padding:8px;
-    animation: carouselScroll 28s linear infinite;
-  }
-  .photos-grid img{ 
-    width:120px;
-    height:120px;
-    border-radius:5px;
+    height:240px;
+    margin-top:8px;
   }
 }
 
 @media (max-width:360px){
   .photos-grid{ 
     height:130px;
-    gap:6px;
-    padding:6px;
-  }
-  .photos-grid img{ 
-    width:100px;
-    height:100px;
   }
 }
 
