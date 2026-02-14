@@ -10,16 +10,51 @@ const photosHeading = document.getElementById('photos-heading');
 const messageHeading = document.getElementById('message-heading');
 const photosGrid = document.getElementById('photos-grid');
 
-// ================== CONTINUOUS CAROUSEL INITIALIZATION ==================
+// ================== PHOTO GALLERY - FADE IN/OUT ==================
 let allPhotos = [];
+let currentPhotoIndex = 0;
+let carouselActive = false;
+let carouselTimer = null;
 
 function initializeCarousel(){
   allPhotos = Array.from(photosGrid.querySelectorAll('img'));
-  // Remove hidden class from all photos to show them in carousel
-  allPhotos.forEach(img => img.classList.remove('hidden'));
-  // Duplicate photos for seamless loop
-  const photoClones = allPhotos.map(img => img.cloneNode(true));
-  photoClones.forEach(clone => photosGrid.appendChild(clone));
+  allPhotos.forEach(img => {
+    img.classList.add('hidden');
+    img.style.opacity = '0';
+  });
+  currentPhotoIndex = 0;
+  showPhotoSequence();
+}
+
+function showPhotoSequence(){
+  if(allPhotos.length === 0) return;
+  
+  const displayPhoto = () => {
+    // Hide all photos
+    allPhotos.forEach(img => img.classList.add('hidden'));
+    
+    // Show current photo with fade in
+    const currentImg = allPhotos[currentPhotoIndex];
+    currentImg.classList.remove('hidden');
+    currentImg.style.animation = 'none';
+    setTimeout(() => {
+      currentImg.style.animation = 'photoFadeIn 0.8s ease-out forwards';
+    }, 10);
+    
+    currentPhotoIndex++;
+    
+    // Move to next photo after 3 seconds
+    if(currentPhotoIndex < allPhotos.length){
+      carouselTimer = setTimeout(displayPhoto, 3000);
+    } else {
+      // Loop back to start
+      currentPhotoIndex = 0;
+      carouselTimer = setTimeout(displayPhoto, 500);
+    }
+  };
+  
+  carouselActive = true;
+  displayPhoto();
 }
 
 function hideAll(){
