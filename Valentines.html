@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Happy Valentines Day</title>
+  <link rel="stylesheet" href="valecss.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <h1>For Angel 💖</h1>
+      <p class="lead">Choose your gift, babe.</p>
+    </header>
+
+    <nav class="gift-nav" role="navigation" aria-label="Gift buttons">
+      <button class="gift-btn" id="btn-photos" aria-pressed="false" title="Photo Bundle">
+        <span class="btn-emoji">📸</span>
+      </button>
+
+      <button class="gift-btn" id="btn-flowers" aria-pressed="false" title="Flower Garden">
+        <span class="btn-emoji">💐</span>
+      </button>
+
+      <button class="gift-btn" id="btn-message" aria-pressed="false" title="Special Message">
+        <span class="btn-emoji">💌</span>
+      </button>
+    </nav>
+
+    <!-- PHOTOS PANEL (hidden until first button click) -->
+    <section class="panel hidden" id="photos-panel" aria-hidden="true">
+      <h2 id="photos-heading" class="panel-title hidden">Our Memories 📷</h2>
+
+      <div class="photos-grid" id="photos-grid" aria-live="polite">
+        <img src="1.jpg" alt="Memory 1">
+        <img src="2.jpg" alt="Memory 2">
+        <img src="3.jpg" alt="Memory 3">
+        <img src="4.jpg" alt="Memory 4">
+        <img src="5.jpg" alt="Memory 5">
+        <img src="6.jpg" alt="Memory 6">
+        <img src="7.jpg" alt="Memory 7">
+        <img src="8.jpg" alt="Memory 8">
+        <img src="9.jpg" alt="Memory 9">
+        <img src="10.jpg" alt="Memory 10">
+        <img src="11.jpg" alt="Memory 11">
+        <img src="12.jpg" alt="Memory 12">
+        <img src="13.jpg" alt="Memory 13">
+        <img src="14.jpg" alt="Memory 14">
+        <img src="15.jpg" alt="Memory 15">
+        <img src="16.jpg" alt="Memory 16">
+        <img src="17.jpg" alt="Memory 17">
+        <img src="18.jpg" alt="Memory 18">
+        <img src="19.jpg" alt="Memory 19">
+        <img src="20.jpg" alt="Memory 20">
+        <img src="21.jpg" alt="Memory 21">
+        <img src="22.jpg" alt="Memory 22">
+        <img src="23.jpg" alt="Memory 23">
+        <img src="24.jpg" alt="Memory 24">
+        <img src="25.jpg" alt="Memory 25">
+        <img src="26.jpg" alt="Memory 26">
+        <img src="27.jpg" alt="Memory 27">
+        <img src="28.jpg" alt="Memory 28">
+        <img src="29.jpg" alt="Memory 29">
+        <img src="30.jpg" alt="Memory 30">
+        <img src="31.jpg" alt="Memory 31">
+        <img src="32.jpg" alt="Memory 32">
+        <img src="33.jpg" alt="Memory 33">
+        <img src="34.jpg" alt="Memory 34">
+        <img src="35.jpg" alt="Memory 35">
+        <img src="36.jpg" alt="Memory 36">
+        <img src="37.jpg" alt="Memory 37">
+      </div>
+    </section>
+
+    <!-- FLOWERS PANEL (shows improved bouquet + interaction) -->
+    <section class="panel hidden" id="flowers-panel" aria-hidden="true">
+      <h2 class="panel-title">A Flower For You 🌷</h2>
+
+      <div class="flower-stage" id="flower-stage" title="Click the flower to make hearts and petals float" role="region" aria-label="Flower area">
+        <!-- single flower SVG -->
+        <div class="bouquet-wrap" id="bouquet" role="img" aria-label="Single flower">
+          <svg viewBox="0 0 200 280" class="bouquet-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="petalGrad" x1="0" x2="1">
+                <stop offset="0%" stop-color="#e9d5ff"/>
+                <stop offset="60%" stop-color="#c084fc"/>
+                <stop offset="100%" stop-color="#a855f7"/>
+              </linearGradient>
+              <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#7c3aed" flood-opacity="0.12"/>
+              </filter>
+            </defs>
+
+            <!-- stem -->
+            <line x1="100" y1="100" x2="100" y2="260" stroke="#2f5f36" stroke-width="8" stroke-linecap="round"/>
+            
+            <!-- leaves -->
+            <ellipse cx="80" cy="180" rx="18" ry="35" fill="#3b6a40" transform="rotate(-30 80 180)" opacity="0.9"/>
+            <ellipse cx="120" cy="200" rx="16" ry="32" fill="#3b6a40" transform="rotate(35 120 200)" opacity="0.9"/>
+
+            <!-- petals arranged in circle -->
+            <g filter="url(#softShadow)">
+              <!-- petal 1 top -->
+              <ellipse cx="100" cy="40" rx="22" ry="32" fill="url(#petalGrad)" />
+              
+              <!-- petal 2 top-right -->
+              <ellipse cx="125" cy="55" rx="22" ry="32" fill="url(#petalGrad)" transform="rotate(60 125 55)" />
+              
+              <!-- petal 3 bottom-right -->
+              <ellipse cx="125" cy="95" rx="22" ry="32" fill="url(#petalGrad)" transform="rotate(120 125 95)" />
+              
+              <!-- petal 4 bottom -->
+              <ellipse cx="100" cy="110" rx="22" ry="32" fill="url(#petalGrad)" transform="rotate(180 100 110)" />
+              
+              <!-- petal 5 bottom-left -->
+              <ellipse cx="75" cy="95" rx="22" ry="32" fill="url(#petalGrad)" transform="rotate(240 75 95)" />
+              
+              <!-- petal 6 top-left -->
+              <ellipse cx="75" cy="55" rx="22" ry="32" fill="url(#petalGrad)" transform="rotate(300 75 55)" />
+            </g>
+
+            <!-- flower center -->
+            <circle cx="100" cy="75" r="14" fill="#fff7e8" opacity="0.95"/>
+            <circle cx="100" cy="75" r="10" fill="#fffacd" opacity="0.9"/>
+          </svg>
+        </div>
+
+        <p class="hint small">Tap mo po ✨</p>
+      </div>
+    </section>
+
+    <!-- MESSAGE PANEL (STATIC, non-editable) -->
+    <section class="panel hidden" id="message-panel" aria-hidden="true">
+      <h2 class="panel-title hidden" id="message-heading">Your Special Message 💕</h2>
+
+      <div id="message-content" class="message-content" tabindex="0" aria-label="Special message">
+        My dearest Angel,
+
+        Happy Valentine’s Day.
+
+It’s been a long time since I last wrote you a letter like this. I don’t even remember the last time I actually sat down and tried to put my feelings into words. Maybe that’s part of what I want to say — I know I haven’t always been the best at expressing myself. I know there are times when I seem incompetent, when I don’t put in as much effort as I should, or when I get too comfortable and forget that love still needs attention and care. And for that, I’m really sorry.
+
+But even if I fail at showing it properly sometimes, please know that my love for you has never been small or uncertain. I love you every single day — even on the quiet days, the busy days, the stressful days, and the ordinary days that don’t feel special at all. My love for you isn’t just in grand gestures or sweet messages. It’s in the way I think about you randomly during the day. It’s in the way I check my phone hoping it’s you. It’s in the small, unnoticed moments that don’t look romantic but feel important to me.
+
+I know I can be inconsistent. Sometimes I get distracted, sometimes I lack initiative, sometimes I don’t give you the effort you truly deserve. I won’t make excuses for that. I just want you to understand that it’s never because I don’t care. It’s never because I don’t value you. If anything, it’s because I get too used to having you there — and that’s not something I should take for granted.
+
+You’ve stayed patient with me. You’ve stayed kind. And you’ve stayed loving even when I probably made it difficult. That’s something I don’t overlook. I appreciate you more than I say. I notice the things you do. I notice the effort. I notice the consistency. And I’m thankful for it.
+
+I may not always be the most expressive person, and I may not always know the perfect words, but my feelings for you are real and steady. I love you not just when things are exciting or easy, but also when things feel routine. I love you in the middle of normal life — in the conversations, the silence, the jokes, the misunderstandings, and the fixing of them. That kind of love feels honest to me.
+
+This Valentine’s Day, I’m not promising dramatic changes or unrealistic perfection. I’m just promising to try harder. To be more intentional. To put more effort into showing what I already feel. You deserve consistency, not just affection. You deserve effort, not just words.
+
+It has been so long since I wrote you something like this, but maybe that’s why it matters now. I don’t want you to ever question whether you are loved. You are. Fully. Even when I don’t show it the best way. Even when I fall short. Even when I’m quiet.
+
+Thank you for staying. Thank you for loving me. And thank you for being someone worth writing about again.
+
+I love you. Always.
+
+        Your one and only Babe,
+        — Pogi
+      </div>
+    </section>
+  </main>
+
+  <script src="valejs.js"></script>
+</body>
+</html>
